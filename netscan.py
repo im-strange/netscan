@@ -258,7 +258,7 @@ def port_scan(host, port_range):
       elif status == socket.timeout: result.append([port, "filtered", label(port)])
 
       # else
-      elif status == socket.error: result.append([port, "close", label(port)])
+      else: result.append([port, "close", label(port)])
 
     sock.close()
     return result
