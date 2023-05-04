@@ -215,7 +215,7 @@ def check_port(host, port):
   elif status == socket.timeout: open_ports.append([port, "filtered", label(port)])
 
   # else
-  else: open_ports.append([port, "close", label(port)])
+  elif status == socket.error: open_ports.append([port, "close", label(port)])
   sock.close()
 
 # scan target host
@@ -258,7 +258,8 @@ def port_scan(host, port_range):
       elif status == socket.timeout: result.append([port, "filtered", label(port)])
 
       # else
-      else: result.append([port, "close", label(port)]) # else
+      elif status == socket.error: result.append([port, "close", label(port)])
+
     sock.close()
     return result
 
