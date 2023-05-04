@@ -199,7 +199,7 @@ def port_scan(host, port_range):
     return result
 
 # run the function and display the results
-def main(host, ports, detect_ssh, detect_webserver):
+def run_main(host, ports, detect_ssh, detect_webserver):
   global open_ports
   options = Options()
   try:
@@ -236,15 +236,17 @@ def main(host, ports, detect_ssh, detect_webserver):
   elapsed = timer.get_time()
   print(f"\nDone in {elapsed}s")
 
-if __name__ == "__main__":
-  check_args()
-  arguments = args_parser(sys.argv)
-  host = arguments["target"]
-  port = arguments["port"]
-  detect_ssh = arguments["detect_ssh"]
-  detect_webserver = arguments["detect_webserver"]
+#if __name__ == "__main__":
+check_args()
+arguments = args_parser(sys.argv)
+host = arguments["target"]
+port = arguments["port"]
+detect_ssh = arguments["detect_ssh"]
+detect_webserver = arguments["detect_webserver"]
 
+def main():
   for target in host:
-    main(target, port, detect_ssh, detect_webserver)
+    run_main(target, port, detect_ssh, detect_webserver)
     if target != host[-1]:
       print("")
+
