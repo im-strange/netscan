@@ -1,4 +1,4 @@
-
+# checking packages
 try:
   import threading
   import socket
@@ -10,6 +10,24 @@ try:
 except ModuleNotFoundError as error:
   print(f"Netscan: {error}")
   exit()
+
+# infos for NetScan
+class NetScan:
+  def __init__(self):
+    self.name = "NetScan"
+    self.version = "NetScan 1.0"
+    self.author = "Sam Genoguin (im-strange)"
+    self.url = "https://github.com/im-strange/netscan.git"
+    self.git_org = "@seventybytes"
+    self.license = "MIT"
+    self.details = {
+      "Name": self.name,
+      "Version": self.version,
+      "License": self.license,
+      "Author": self.author,
+      "URL": self.url,
+      "GitHub org.": self.git_org
+    }
 
 # functions for options
 class Options:
@@ -42,11 +60,13 @@ class Options:
 # print help message
 def display_help():
   help_msgs = [
-    "usage: netscan [-t TARGET] [--port PORT]\n",
+    "usage: netscan [OPTIONS] [-t TARGET] [--port PORT]\n",
     "Options:",
     f" {'-h, --help':<15} display help",
     f" {'-p, --port':<15} define specific port or range",
     f" {'-t, --target':<15} specify single target host (comma separated if multiple)",
+    f" {'--version':<15} print netscan version",
+    f" {'--info':<15} display available details about netscan",
     f" {'--server':<15} attempts to detect web server running",
     f" {'--ssh':<15} attempts to detect ssh server running"
 ]
@@ -89,27 +109,44 @@ def args_parser(list):
 
 # check args
 def check_args():
+  netscan_info = NetScan()
   options_list = [
     "-h", "--help",
     "-p", "--port",
     "-t", "--target",
-    "--server", "--ssh"
+    "--server", "--ssh",
+    "--version", "--info"
   ]
   args = sys.argv
+  # if argument is invalid
   for arg in args:
     if "-" in arg and arg not in options_list and not "-" in args[(args.index(arg)-1)]:
       print(f"Netscan: Invalid option '{arg}'")
       exit()
 
+  # if need help
   if "-h" in args or "--help" in args:
     display_help()
     exit()
 
+  # if no argument given
   if len(args) < 2:
     print(f"Netscan: Not enough argument")
     display_help()
     exit()
 
+  if "--version" in args:
+    print(f"Version: {netscan_info.version}")
+    exit()
+
+  if "--info" in args:
+    infos = netscan_info.details
+    space_len = len(max(list(infos.keys()))) + 5
+    for key, val in infos.items():
+      print(f"{key:<{space_len}} {val}")
+    exit()
+
+  # if no target specified
   if "-t" not in args:
     if "--target" in args: pass
     else:
@@ -132,11 +169,16 @@ class Timer:
     self.stop_time = None
     self.elapsed_time = None
 
+  # start timer
   def start(self):
     self.start_time = time.time()
+
+  # stop timer
   def stop(self):
     self.stop_time = time.time()
     self.elapsed_time = self.stop_time - self.start_time
+
+  # get elapsed time
   def get_time(self):
     return round(self.elapsed_time, 2)
 
@@ -145,10 +187,17 @@ timer = Timer()
 
 # split argument for port range
 def port_handler(port_range):
+  # split given port(s)
   ports = re.split(",|-", port_range)
   type = ""
+
+  # if separated by '-', then range
   if "-" in port_range: type = "range"
+
+  # if only one port is given
   elif len(port_range) == 1: type = "single"
+
+  # else
   else: type = "listed"
   return [type, ports]
 
@@ -158,17 +207,25 @@ def check_port(host, port):
   sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
   sock.settimeout(1)
   status = sock.connect_ex((host, port))
+
+  # if connection succeed
   if status == 0: open_ports.append([port, "open", label(port)])
+
+  # if connection timed out
   elif status == socket.timeout: open_ports.append([port, "filtered", label(port)])
-  elif status == socket.error: open_ports.append([port, "close", label(port)])
+
+  # else
+  else: open_ports.append([port, "close", label(port)])
   sock.close()
 
 # scan target host
 def port_scan(host, port_range):
+  # defining target infos
   host = socket.gethostbyname(host)
   port_info = port_handler(port_range)
   scan_type = port_info[0]
 
+  # check if port(s) given is/are valid
   try: ports = [int(port) for port in port_info[1]]
   except ValueError: print("Netscan: Invalid port given"), exit()
 
@@ -188,19 +245,27 @@ def port_scan(host, port_range):
 
   # scan with given list
   else:
+    # iterating with progress bar
     for port in tqdm(ports):
       sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
       sock.settimeout(1)
       status = sock.connect_ex((host, port))
+
+      # if connection succeed
       if status == 0: result.append([port, "open", label(port)])
+
+      # if connection timed out
       elif status == socket.timeout: result.append([port, "filtered", label(port)])
-      else: result.append([port, "close", label(port)])
+
+      # else
+      else: result.append([port, "close", label(port)]) # else
     sock.close()
     return result
 
 # run the function and display the results
 def run_main(host, ports, detect_ssh, detect_webserver):
   global open_ports
+  # initialzing Options class (see line 15)
   options = Options()
   try:
     host_ip = socket.gethostbyname(host)
@@ -219,6 +284,7 @@ def run_main(host, ports, detect_ssh, detect_webserver):
   for r in result_list:
     print(f" {r[0]:<15}{r[1]:<15}{r[2]:<15}")
 
+  # if webserver detection is enable
   if detect_webserver:
     print(f"\nScan report for server detection")
     webserver = options.detect_webserver(host)
@@ -227,26 +293,36 @@ def run_main(host, ports, detect_ssh, detect_webserver):
     else:
       print(f" {'Server':<15}{webserver[1]}")
 
+  # if SSH detection is enable
   if detect_ssh:
     print(f"\nScan report for SSH server detection")
     ssh_server = options.detect_ssh(host)
     print(f" {'SSH':<15}{ssh_server}")
 
+  # printing elapsed time
   timer.stop()
   elapsed = timer.get_time()
   print(f"\nDone in {elapsed}s")
 
-#if __name__ == "__main__":
-check_args()
-arguments = args_parser(sys.argv)
-host = arguments["target"]
-port = arguments["port"]
-detect_ssh = arguments["detect_ssh"]
-detect_webserver = arguments["detect_webserver"]
-
+# main function to run if 'netscan' command is called
 def main():
+  # run port scanning
+  check_args()
+
+  # get arguments given
+  arguments = args_parser(sys.argv)
+  host = arguments["target"]
+  port = arguments["port"]
+  detect_ssh = arguments["detect_ssh"]
+  detect_webserver = arguments["detect_webserver"]
+
+  # iterate to given host
   for target in host:
     run_main(target, port, detect_ssh, detect_webserver)
+
+    # separate report for hosts
     if target != host[-1]:
       print("")
 
+if __name__ == "__main__":
+  main()
