@@ -68,7 +68,8 @@ def display_help():
     f" {'--version':<15} print netscan version",
     f" {'--info':<15} display available details about netscan",
     f" {'--server':<15} attempts to detect web server running",
-    f" {'--ssh':<15} attempts to detect ssh server running"
+    f" {'--ssh':<15} attempts to detect ssh server running",
+    f" \nNote: Always check for updates."
 ]
   for msg in help_msgs:
     print(msg)
