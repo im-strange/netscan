@@ -6,7 +6,7 @@
 - Web and SSH server detection
 - Progress bar
 
-# Installation
+## Installation
 ```
 pip install git+https://github.com/im-strange/netscan.git
 ```
