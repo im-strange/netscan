@@ -1,4 +1,4 @@
-# NetScan
+# NetScan <br>![](https://badgen.net/badge/license/MIT/blue) ![](https://badgen.net/badge/netscan/v1.0.0/blue)
 ## Features
 - Server scanning
 - Custom port scanning
