@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
   name="netscan",
-  version="1.0",
+  version="1.0.0",
   author="Sam Genoguin",
   description="A Python tool for network scanning.",
   url="https://github.com/im-strange/netscan.git",
