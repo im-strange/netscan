@@ -1,4 +1,8 @@
-# NetScan <br>![](https://badgen.net/badge/license/MIT/blue) ![](https://badgen.net/badge/netscan/v1.0.0/blue)
+# NetScan
+<p align="center">
+ <img src="https://img.shields.io/badge/License-MIT-blue?style=for-the-badge">
+</p>
+
 ## Features
 - Server scanning
 - Custom port scanning
