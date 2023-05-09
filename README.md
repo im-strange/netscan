@@ -1,5 +1,6 @@
-<h1 align="center"> NetScan </h
-<p align="center">
+<h1 align="center"> NetScan </h1>
+
+ <p align="center">
  <img src="https://img.shields.io/badge/License-MIT-blue?style=for-the-badge">
  <img src="https://img.shields.io/badge/Netscan-1.0.0-red?style=for-the-badge">
  <img src="https://img.shields.io/badge/Python-3.11.1-blue?style=for-the-badge">
