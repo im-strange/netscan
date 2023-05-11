@@ -35,5 +35,4 @@ Note: Always check for updates.
 ```
 <br>
 
-> Use this repository's content only for legal and ethical purposes.
-I do not support any illegal actions.
+> Use this repository's content only for legal and ethical purposes. I do not support any illegal actions.
