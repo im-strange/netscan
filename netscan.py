@@ -1,4 +1,4 @@
-# checking packages
+# check packages
 try:
   import threading
   import socket
@@ -7,6 +7,7 @@ try:
   import sys
   from tqdm import tqdm
   import requests
+
 except ModuleNotFoundError as error:
   print(f"Netscan: {error}")
   exit()
