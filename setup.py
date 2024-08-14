@@ -1,19 +1,25 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
-  name="netscan",
-  version="1.0.0",
-  author="im-strange",
-  description="A Python tool for network scanning.",
-  url="https://github.com/im-strange/netscan.git",
-  py_modules=["netscan"],
-  install_requires=[
-    "tqdm",
-    "requests"
-  ],
-  entry_points={
-    "console_scripts": [
-      "netscan = netscan:main"
-    ]
-  }
+    name='netscan',
+    version='1.1.0',
+    packages=find_packages(),
+    entry_points={
+        'console_scripts': [
+            'netscan=netscan.main:main',
+        ],
+    },
+    install_requires=[
+        "requests", "tqdm"
+    ],
+	include_package_data=True,
+	package_data={
+		'': ["ports.json"]
+	},
+    author='im-strange',
+    description='A command-line tool for scanning servers',
+    long_description=open('README.md').read(),
+    long_description_content_type='text/markdown',
+    url='https://github.com/im-strange/netscan',
+    license='MIT',
 )
