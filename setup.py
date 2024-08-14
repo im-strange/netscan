@@ -3,10 +3,11 @@ from setuptools import setup, find_packages
 setup(
     name='netscan',
     version='1.1.0',
+	py_modules=["netscan"],
     packages=find_packages(),
     entry_points={
         'console_scripts': [
-            'netscan=netscan.main:main',
+            'netscan=netscan.cli:main',
         ],
     },
     install_requires=[

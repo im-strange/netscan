@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 # colors
 BLACK = '\033[30m'
 RED = '\033[31m'
@@ -121,8 +123,10 @@ def main():
 		port_list = port_parser(args.port)
 
 		print(f"\n[INFO] netscan started")
-		print(f"\t{'HOST':<10}{target_hosts}")
-		print(f"\t{'PORT':<10}{target_ports}")
+		print(f"\t{'PORT':<15}HOST")
+
+		for host in target_hosts:
+			print(f"\t{target_ports:<15}{host}")
 
 		processes = scan_multiple(target_hosts, port_list)
 		kill_threads(processes)
