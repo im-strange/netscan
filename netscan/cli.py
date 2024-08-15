@@ -55,9 +55,13 @@ def limit(name):
 
 
 # get port service name
-json_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "ports.json")
-with open(json_file, "r") as file:
-	services = json.load(file)
+try:
+	json_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "ports.json")
+	with open(json_file, "r") as file:
+		services = json.load(file)
+except OSError:
+	print(f"[NETSCAN] unexpected error occured")
+	exit(2)
 
 def service_name(ports):
 	service_list = []
@@ -72,13 +76,13 @@ def service_name(ports):
 
 # scan a port
 def scan_port(host, port, open_ports):
-	with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-		sock.settimeout(1)
-		try:
+	try:
+		with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+			sock.settimeout(1)
 			sock.connect((host, port))
 			open_ports.append(port)
-		except (socket.timeout, ConnectionRefusedError):
-			pass
+	except (socket.timeout, socket.error, ConnectionRefusedError):
+		pass
 
 
 # scan ports
