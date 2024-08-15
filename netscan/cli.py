@@ -26,6 +26,7 @@ try:
 	import threading
 	import argparse
 	import socket
+	import time
 	import json
 	import os
 
@@ -43,6 +44,14 @@ def port_parser(port_str):
 	elif "," in port_str:
 		ports = [int(port) for port in port_str.split(",")]
 		return ports
+	else:
+		return [int(port_str)]
+
+
+# limit service name length
+def limit(name):
+	max_length = 30
+	return name if len(name) <= max_length else name[:max_length+1] + ".."
 
 
 # get port service name
@@ -55,7 +64,7 @@ def service_name(ports):
 	for port in ports:
 		name = services.get(str(port))
 		if name:
-			service_list.append([port, name[0]["description"]])
+			service_list.append([port, limit(name[0]["description"])])
 		else:
 			service_list.append([port, "unknown service"])
 	return service_list
@@ -63,75 +72,94 @@ def service_name(ports):
 
 # scan a port
 def scan_port(host, port, open_ports):
-	try:
-		with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-			sock.settimeout(1)
-			result = sock.connect_ex((host, port))
-			if result == 0:
-				open_ports.append(port)
-	except socket.error as error:
-		pass
+	with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+		sock.settimeout(1)
+		try:
+			sock.connect((host, port))
+			open_ports.append(port)
+		except (socket.timeout, ConnectionRefusedError):
+			pass
 
 
 # scan ports
-def scan_ports(host, ports, thread_list):
+def scan_ports(host, ports):
 	open_ports = []
-
+	thread_list = []
 	for port in tqdm(ports, leave=False):
 		thread = threading.Thread(target=scan_port, args=(host, port, open_ports))
 		thread_list.append(thread)
 		thread.start()
-
+	for t in thread_list:
+		t.join()
 	return open_ports
 
 
 # display
 def display_result(host, target_ports, open_ports):
-	print(f"\n{DARK_GRAY}[{YELLOW}INFO{DARK_GRAY}] {MAGENTA}@{host} {YELLOW}{len(open_ports)}/{len(target_ports)} were found open{RESET}")
+	print(f"{DARK_GRAY}[{YELLOW}INFO{DARK_GRAY}] {MAGENTA}@{host} {YELLOW}{len(open_ports)}/{len(target_ports)} were found open{RESET}")
 	if len(open_ports) > 0:
+		time.sleep(0.01)
 		open_ports = service_name(open_ports)
 		print(f"\t{CYAN}{'PORT':<10}SERVICE{RESET}")
 		for port in open_ports:
 			print(f"\t{port[0]:<10}{port[1]}")
-
-
-# terminate scan
-def kill_threads(thread_list):
-	print(f"\n{DARK_GRAY}[{YELLOW}INFO{DARK_GRAY}] {YELLOW}terminating process{RESET}")
-	for t in thread_list:
-		t.join()
-	print(f"{DARK_GRAY}[{YELLOW}INFO{DARK_GRAY}] {YELLOW}threads terminated{RESET}\n")
+			time.sleep(0.01)
+	print()
 
 
 # scan multiple host
 def scan_multiple(hosts, ports):
-	thread_list = []
 	for host in hosts:
-		open_ports = scan_ports(host, ports, thread_list)
+		open_ports = scan_ports(host, ports)
 		display_result(host, ports, open_ports)
-	return thread_list
 
 
 # main
 def main():
 	try:
-		parser = argparse.ArgumentParser()
+		# cli info
+		cli_version = "netscan 1.1.0"
+
+		# custom parser
+		class CustomArgumentParser(argparse.ArgumentParser):
+			def print_help(self):
+				lines = [
+					f"usage: netscan <target_host> [OPTIONS]",
+					f"\noptions:",
+					f"{' '*4}{'-h, --help':<15} show this help message and exit",
+					f"{' '*4}{'-v, --version':<15} show this cli version",
+					f"{' '*4}{'-p, --port':<15} single, range, or comma-separated"
+				]
+				for line in lines:
+					print(line)
+
+			def error(self, message):
+				print(f"{DARK_GRAY}[{YELLOW}NETSCAN{DARK_GRAY}] {RESET}{message}")
+				print()
+				self.print_help()
+				exit(2)
+
+		parser = CustomArgumentParser()
 		parser.add_argument("target", type=str, help="target host")
+		parser.add_argument("-v", "--version", action="version", version=cli_version)
 		parser.add_argument("-p", "--port", default="1-1000", help="target port: range or comma-separated")
 
+		# arguments
 		args = parser.parse_args()
 		target_hosts = args.target.split(",")
 		target_ports = args.port
 		port_list = port_parser(args.port)
 
+		# display
 		print(f"\n{DARK_GRAY}[{YELLOW}INFO{DARK_GRAY}] {YELLOW}netscan started{RESET}")
-		print(f"\t{CYAN}{'PORT':<15}HOST{RESET}")
-
-		for host in target_hosts:
-			print(f"\t{target_ports:<15}{host}")
+		time.sleep(0.01)
+		print(f"\t{CYAN}{'HOST':<10}{RESET}{target_hosts}{RESET}")
+		time.sleep(0.01)
+		print(f"\t{CYAN}{'PORT':<10}{RESET}{target_ports}{RESET}")
+		time.sleep(0.01)
+		print()
 
 		processes = scan_multiple(target_hosts, port_list)
-		kill_threads(processes)
 
 	except KeyboardInterrupt:
 		print(f"\n{DARK_GRAY}[{YELLOW}STOPPED{DARK_GRAY}] {YELLOW}keyboard interrupt{RESET}\n")
