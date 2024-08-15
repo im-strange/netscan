@@ -30,7 +30,7 @@ try:
 	import os
 
 except ModuleNotFoundError as error:
-	print(f"[NETSCAN] {error}")
+	print(f"{DARK_GRAY}[{YELLOW}NETSCAN{DARK_GRAY}] {YELLOW}{error}")
 
 
 # parse port
@@ -87,19 +87,20 @@ def scan_ports(host, ports, thread_list):
 
 # display
 def display_result(host, target_ports, open_ports):
-	print(f"\n[INFO] @{host} {len(open_ports)}/{len(target_ports)} were found open")
+	print(f"\n{DARK_GRAY}[{YELLOW}INFO{DARK_GRAY}] {MAGENTA}@{host} {YELLOW}{len(open_ports)}/{len(target_ports)} were found open{RESET}")
 	if len(open_ports) > 0:
 		open_ports = service_name(open_ports)
-		print(f"\t{'PORT':<10}SERVICE")
+		print(f"\t{CYAN}{'PORT':<10}SERVICE{RESET}")
 		for port in open_ports:
 			print(f"\t{port[0]:<10}{port[1]}")
 
+
 # terminate scan
 def kill_threads(thread_list):
-	print(f"\n[INFO] terminating process")
+	print(f"\n{DARK_GRAY}[{YELLOW}INFO{DARK_GRAY}] {YELLOW}terminating process{RESET}")
 	for t in thread_list:
 		t.join()
-	print("[INFO] threads terminated")
+	print(f"{DARK_GRAY}[{YELLOW}INFO{DARK_GRAY}] {YELLOW}threads terminated{RESET}\n")
 
 
 # scan multiple host
@@ -109,6 +110,7 @@ def scan_multiple(hosts, ports):
 		open_ports = scan_ports(host, ports, thread_list)
 		display_result(host, ports, open_ports)
 	return thread_list
+
 
 # main
 def main():
@@ -122,8 +124,8 @@ def main():
 		target_ports = args.port
 		port_list = port_parser(args.port)
 
-		print(f"\n[INFO] netscan started")
-		print(f"\t{'PORT':<15}HOST")
+		print(f"\n{DARK_GRAY}[{YELLOW}INFO{DARK_GRAY}] {YELLOW}netscan started{RESET}")
+		print(f"\t{CYAN}{'PORT':<15}HOST{RESET}")
 
 		for host in target_hosts:
 			print(f"\t{target_ports:<15}{host}")
@@ -132,7 +134,7 @@ def main():
 		kill_threads(processes)
 
 	except KeyboardInterrupt:
-		print(f"[STOPPED] keyboard interrupt")
+		print(f"\n{DARK_GRAY}[{YELLOW}STOPPED{DARK_GRAY}] {YELLOW}keyboard interrupt{RESET}\n")
 
 
 if __name__ == "__main__":
