@@ -2,7 +2,7 @@
 
  <p align="center">
  <img src="https://img.shields.io/badge/License-MIT-blue?style=for-the-badge">
- <img src="https://img.shields.io/badge/Netscan-1.0.0-red?style=for-the-badge">
+ <img src="https://img.shields.io/badge/Netscan-1.1.0-red?style=for-the-badge">
  <img src="https://img.shields.io/badge/Python-3.11.1-blue?style=for-the-badge">
 </p>
 
@@ -20,18 +20,27 @@ pip install git+https://github.com/im-strange/netscan.git
 
 ## Usage
 ```
-usage: netscan [OPTIONS] [-t TARGET] [--port PORT]
+usage: netscan <target_host> [OPTIONS]
 
-Options:
- -h, --help      display help
- -p, --port      define specific port or range
- -t, --target    specify single target host (comma separated if multiple)
- --version       print netscan version
- --info          display available details about netscan
- --server        attempts to detect web server running
- --ssh           attempts to detect ssh server running
+options:
+    -h, --help      show this help message and exit
+    -v, --version   show this cli version
+    -p, --port      single, range, or comma-separated
+```
 
-Note: Always check for updates.
+## Example output
+```python
+$ netscan www.google.com -p 1-10000
+
+[INFO] netscan started
+        HOST      ['www.google.com']
+        PORT      1-10000
+
+[INFO] @www.google.com 2/10000 were found open
+        PORT      SERVICE
+        80        Hypertext Transfer Protocol (HT..
+        443       Hypertext Transfer Protocol ove..
+
 ```
 <br>
 
