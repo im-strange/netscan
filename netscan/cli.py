@@ -1,3 +1,4 @@
+#!/bin/python3
 
 # built-in modules, does not need pre-checking
 import configparser
