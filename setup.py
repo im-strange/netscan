@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='netscan',
-    version='1.1.0',
+    version='1.2.0',
 	py_modules=["netscan"],
     packages=find_packages(),
     entry_points={
@@ -15,9 +15,10 @@ setup(
     ],
 	include_package_data=True,
 	package_data={
-		'': ["ports.json"]
+		'': ["netscan/*"]
 	},
     author='im-strange',
+	author_email="itsmestrange.dump@gmail.com",
     description='A command-line tool for scanning servers',
     long_description=open('README.md').read(),
     long_description_content_type='text/markdown',

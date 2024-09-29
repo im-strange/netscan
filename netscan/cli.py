@@ -1,173 +1,219 @@
-#!/usr/bin/env python3
+
+# built-in modules, does not need pre-checking
+import configparser
+import threading
+import argparse
+import socket
+import json
+import time
+import sys
+import os
+
 
 # colors
-BLACK = '\033[30m'
 RED = '\033[31m'
 GREEN = '\033[32m'
 YELLOW = '\033[33m'
 BLUE = '\033[34m'
 MAGENTA = '\033[35m'
-CYAN = '\033[36m'
-LIGHT_GRAY = '\033[37m'
-DARK_GRAY = '\033[90m'
-BRIGHT_RED = '\033[91m'
-BRIGHT_GREEN = '\033[92m'
-BRIGHT_YELLOW = '\033[93m'
-BRIGHT_BLUE = '\033[94m'
-BRIGHT_MAGENTA = '\033[95m'
-BRIGHT_CYAN = '\033[96m'
-WHITE = '\033[97m'
+GRAY = '\033[90m'
 RESET = '\033[0m'
 
 
-# import libraries
+# check if third-party modules are installed
 try:
 	from tqdm import tqdm
-	import threading
-	import argparse
-	import socket
-	import time
-	import json
-	import os
+	import socks
 
-except ModuleNotFoundError as error:
-	print(f"{DARK_GRAY}[{YELLOW}NETSCAN{DARK_GRAY}] {YELLOW}{error}")
-
-
-# parse port
-def port_parser(port_str):
-	if "-" in port_str:
-		pattern = port_str.split("-")
-		start_port, end_port = int(pattern[0]), int(pattern[1])
-		port_list = list(range(start_port, end_port + 1))
-		return port_list
-	elif "," in port_str:
-		ports = [int(port) for port in port_str.split(",")]
-		return ports
-	else:
-		return [int(port_str)]
-
-
-# limit service name length
-def limit(name):
-	max_length = 30
-	return name if len(name) <= max_length else name[:max_length+1] + ".."
-
-
-# get port service name
-try:
-	json_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "ports.json")
-	with open(json_file, "r") as file:
-		services = json.load(file)
-except OSError:
-	print(f"[NETSCAN] unexpected error occured")
+# else, tell the user
+except ModuleNotFoundError as e:
+	print(f"[netscan] {e}")
 	exit(2)
 
-def service_name(ports):
-	service_list = []
-	for port in ports:
-		name = services.get(str(port))
-		if name:
-			service_list.append([port, limit(name[0]["description"])])
-		else:
-			service_list.append([port, "unknown service"])
-	return service_list
+
+# get current datetime
+def current_time():
+	current =  datetime.now().strftime('%m-%d-%Y %I:%M:%S%p')
+	return current
+
+# get the absolute path for a file
+def path(file):
+	return os.path.join(os.path.abspath(__file__), file)
 
 
-# scan a port
-def scan_port(host, port, open_ports):
-	try:
-		with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-			sock.settimeout(1)
-			sock.connect((host, port))
-			open_ports.append(port)
-	except (socket.timeout, socket.error, ConnectionRefusedError):
-		pass
+# print bracket
+def bracket(text):
+	return f"{GRAY}[{YELLOW}{text}{GRAY}]{RESET}"
 
+# main class
+class PortScanner:
+	def __init__(self, config_file, target, port):
+		self.name = "netscan"
+		self.target = target
+		self.port = port
 
-# scan ports
-def scan_ports(host, ports):
-	open_ports = []
-	thread_list = []
-	for port in tqdm(ports, leave=False):
-		thread = threading.Thread(target=scan_port, args=(host, port, open_ports))
-		thread_list.append(thread)
-		thread.start()
-	for t in thread_list:
-		t.join()
-	return open_ports
+		try:
+			self.port_list = self.parse_port(self.port)
+		except ValueError:
+			print(f"{bracket('info')} invalid --port value: {self.port}")
+			exit(2)
 
+		if not os.path.exists(config_file):
+			print(f"[{self.name}] config file '{config_file}' not found")
+			exit(2)
 
-# display
-def display_result(host, target_ports, open_ports):
-	print(f"{DARK_GRAY}[{YELLOW}INFO{DARK_GRAY}] {MAGENTA}@{host} {YELLOW}{len(open_ports)}/{len(target_ports)} were found open{RESET}")
-	if len(open_ports) > 0:
-		time.sleep(0.01)
-		open_ports = service_name(open_ports)
-		print(f"\t{CYAN}{'PORT':<10}SERVICE{RESET}")
-		for port in open_ports:
-			print(f"\t{port[0]:<10}{port[1]}")
-			time.sleep(0.01)
-	print()
+		self.config = configparser.ConfigParser()
+		self.config.read(config_file)
 
+		self.port_services_file = self.config.get("files", "port_services")
+		self.timeout = int(self.config.get("settings", "timeout_per_connect"))
 
-# scan multiple host
-def scan_multiple(hosts, ports):
-	for host in hosts:
-		open_ports = scan_ports(host, ports)
-		display_result(host, ports, open_ports)
+		with open(self.port_services_file) as file:
+			self.port_services = json.load(file)
 
+	# get the service names of given list of ports
+	def get_service_name(self, ports):
+		names = []
+		for port in ports:
+			name = self.port_services.get(str(port))
+			if name:
+				names.append([port, name])
+			else:
+				names.append([port, "unknown service"])
+		return names
 
-# main
-def main():
-	try:
-		# cli info
-		cli_version = "netscan 1.1.0"
+	# turn given port argument into a list of ports
+	def parse_port(self, port_str):
+		# if range
+		if "-" in port_str:
+			pattern = port_str.split("-")
+			start_port, end_port = int(pattern[0]), int(pattern[1])
 
-		# custom parser
-		class CustomArgumentParser(argparse.ArgumentParser):
-			def print_help(self):
-				lines = [
-					f"usage: netscan <target_host> [OPTIONS]",
-					f"\noptions:",
-					f"{' '*4}{'-h, --help':<15} show this help message and exit",
-					f"{' '*4}{'-v, --version':<15} show this cli version",
-					f"{' '*4}{'-p, --port':<15} single, range, or comma-separated"
-				]
-				for line in lines:
-					print(line)
-
-			def error(self, message):
-				print(f"{DARK_GRAY}[{YELLOW}NETSCAN{DARK_GRAY}] {RESET}{message}")
-				print()
-				self.print_help()
+			if end_port > 65535:
+				print(f"{bracket('info')} port must be 0-65535")
 				exit(2)
 
-		parser = CustomArgumentParser()
-		parser.add_argument("target", type=str, help="target host")
-		parser.add_argument("-v", "--version", action="version", version=cli_version)
-		parser.add_argument("-p", "--port", default="1-1000", help="target port: range or comma-separated")
+			port_list = list(range(start_port, end_port+1))
+			return port_list
 
-		# arguments
-		args = parser.parse_args()
-		target_hosts = args.target.split(",")
-		target_ports = args.port
-		port_list = port_parser(args.port)
+		# if list (comma-separated)
+		elif "," in port_str:
+			port_list = [int(port) for port in port_str.split(",")]
+			if any(port > 65535 for port in port_list):
+				print(f"{bracket('info')} port must be 0-65535")
+				exit(2)
+			return port_list
 
-		# display
-		print(f"\n{DARK_GRAY}[{YELLOW}INFO{DARK_GRAY}] {YELLOW}netscan started{RESET}")
-		time.sleep(0.01)
-		print(f"\t{CYAN}{'HOST':<10}{RESET}{target_hosts}{RESET}")
-		time.sleep(0.01)
-		print(f"\t{CYAN}{'PORT':<10}{RESET}{target_ports}{RESET}")
-		time.sleep(0.01)
+		# else, must be given a single port
+		else:
+			if int(port_str) > 65535:
+				print(f"{bracket('info')} port must be 0-65535")
+				exit(2)
+			return [int(port_str)]
+
+	# scan a port
+	def scan_port(self, ip, port, open_ports):
+		try:
+			with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+				sock.settimeout(self.timeout)
+				result = sock.connect((ip, port))
+				open_ports.append(port)
+
+		except (socket.timeout, socket.error, ConnectionRefusedError) as e:
+			if self.verbose:
+				print(f"{bracket('info')} {e} in port {port}")
+			else:
+				pass
+
+	# multi-thread scanning
+	def scan_ports(self, ip, ports):
+		open_ports = []
+		threads = []
+		for port in tqdm(ports, leave=False):
+			thread = threading.Thread(target=self.scan_port, args=(ip, port, open_ports))
+			thread.daemon = True
+			threads.append(thread)
+			thread.start()
+		for thread in threads:
+			thread.join()
+		return open_ports
+
+	# display scan results
+	def display_results(self, ip, target_ports, open_ports):
+		tabsize = 4
+		print(f"\n{bracket('info')} {MAGENTA}@{ip}{RESET} {len(open_ports)}/{len(target_ports)} were found open:")
+		if len(open_ports) > 0:
+			print(f"{' '*tabsize}{BLUE}{'PORT':<10}SERVICE{RESET}")
+			port_service_names = self.get_service_name(open_ports)
+			for port in port_service_names:
+				print(f"{' '*tabsize}{port[0]:<10}{port[1]}")
+				time.sleep(0.01)
+
+	# display settings from the config file
+	def display_config(self):
+		pass
+
+	# start scan
+	def start_scan(self):
+		tabsize = 4
 		print()
+		print(f"{bracket('info')} netscan started")
+		print(f"{' '*tabsize}{BLUE}{'TARGET':<10}{RESET}{','.join(self.target)}")
+		print(f"{' '*tabsize}{BLUE}{'PORT':<10}{RESET}{self.port}")
+		print(f"{' '*tabsize}{BLUE}{'VERBOSE':<10}{RESET}{self.verbose}")
 
-		processes = scan_multiple(target_hosts, port_list)
+		start_time = time.time()
+		for target in self.target:
+			results = self.scan_ports(target, self.port_list)
+			self.display_results(target, self.port_list, results)
 
-	except KeyboardInterrupt:
-		print(f"\n{DARK_GRAY}[{YELLOW}STOPPED{DARK_GRAY}] {YELLOW}keyboard interrupt{RESET}\n")
+		elapsed_time = round(time.time() - start_time, 1)
+		print(f"\n{bracket('info')} netscan finished in {elapsed_time}s")
 
+# main function to call
+def main():
+	class CustomArgumentParser(argparse.ArgumentParser):
+		def print_help(self):
+			tabsize = 2
+			lines = [
+				f"usage: netscan <host> [options]",
+				f"\npositional arguments:",
+				f"{' '*tabsize}{'target':<15} target host/s",
+				f"{' '*tabsize}{'-p, --port':<15} target port/s [default=1-1000]",
+				f"\noptional arguments:",
+				f"{' '*tabsize}{'-v, --verbose':<15} print scanning info",
+				f"{' '*tabsize}{'-o, --output':<15} output file to write",
+				f"\nexamples:",
+				f"{' '*tabsize}netscan 127.0.0.1 -p 22,80,443",
+				f"{' '*tabsize}netscan example.com -o myresults.txt"
+			]
+			for line in lines:
+				print(line)
+				time.sleep(0.01)
+
+		def error(self, message):
+			print(f"[netscan] {message}")
+			print(f"[netscan] see '--help' for more info")
+			exit(2)
+
+	parser = CustomArgumentParser()
+	parser.add_argument("target")
+	parser.add_argument("-p", "--port", default="1-1000")
+	parser.add_argument("-v", "--verbose", action="store_true")
+	parser.add_argument("-o", "--output")
+
+	args = parser.parse_args()
+	target = args.target.split(',')
+	port = args.port
+
+	config_file = "netscan.conf"
+	port_scanner = PortScanner(config_file, target, port)
+	port_scanner.verbose = args.verbose
+	port_scanner.start_scan()
 
 if __name__ == "__main__":
-	main()
+	try:
+		main()
+	except KeyboardInterrupt:
+		print(f"\r\r\r\r\n{bracket('info')} stopped by user")
+		exit()
