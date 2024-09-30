@@ -1,4 +1,4 @@
-#!/bin/python3
+#!/usr/bin/python3
 
 # built-in modules, does not need pre-checking
 import configparser
@@ -64,7 +64,7 @@ class PortScanner:
 			exit(2)
 
 		self.config = configparser.ConfigParser()
-		self.config.read(config_file)
+		self.config.read(path(config_file))
 
 		self.port_services_file = self.config.get("files", "port_services")
 		self.timeout = int(self.config.get("settings", "timeout_per_connect"))
