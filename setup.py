@@ -15,7 +15,7 @@ setup(
     ],
 	include_package_data=True,
 	package_data={
-		'': ["netscan/*"]
+		'netscan': ["*.json", "*.conf"]
 	},
     author='im-strange',
 	author_email="itsmestrange.dump@gmail.com",
