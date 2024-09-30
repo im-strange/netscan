@@ -53,6 +53,10 @@ $ netscan www.google.com -p 1-10000
 [info] netscan finished in 0.4s
 
 ```
+
+## Found a bug?
+Shoot us an email **im.strange.git@gmail.com**
+
 <br>
 
 > The content of this repository is provided strictly for educational and ethical purposes. Any misuse of the tools or information provided for illegal activities is not supported or endorsed by the author. Use this content responsibly and only in compliance with all applicable laws and regulations.
