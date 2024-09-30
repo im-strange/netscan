@@ -55,7 +55,7 @@ $ netscan www.google.com -p 1-1000
 ```
 
 ## Found a bug?
-Shoot us an email **im.strange.git@gmail.com**
+Shoot me an email at **im.strange.git@gmail.com**
 
 <br>
 
