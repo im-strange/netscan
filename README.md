@@ -38,7 +38,7 @@ examples:
 
 ## Example output
 ```python
-$ netscan www.google.com -p 1-10000
+$ netscan www.google.com -p 1-1000
 
 [info] netscan started
     TARGET    localhost
