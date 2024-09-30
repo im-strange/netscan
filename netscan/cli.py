@@ -39,7 +39,7 @@ def current_time():
 
 # get the absolute path for a file
 def path(file):
-	return os.path.join(os.path.abspath(__file__), file)
+	return os.path.join(os.path.dirname(os.path.abspath(__file__)), file)
 
 
 # print bracket
@@ -52,6 +52,7 @@ class PortScanner:
 		self.name = "netscan"
 		self.target = target
 		self.port = port
+		self.config_file = path(config_file)
 
 		try:
 			self.port_list = self.parse_port(self.port)
@@ -59,14 +60,14 @@ class PortScanner:
 			print(f"{bracket('info')} invalid --port value: {self.port}")
 			exit(2)
 
-		if not os.path.exists(config_file):
-			print(f"[{self.name}] config file '{config_file}' not found")
+		if not os.path.exists(self.config_file):
+			print(f"[{self.name}] config file '{self.config_file}' not found")
 			exit(2)
 
 		self.config = configparser.ConfigParser()
 		self.config.read(path(config_file))
 
-		self.port_services_file = self.config.get("files", "port_services")
+		self.port_services_file = path(self.config.get("files", "port_services"))
 		self.timeout = int(self.config.get("settings", "timeout_per_connect"))
 
 		with open(self.port_services_file) as file:
