@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 
 # built-in modules, does not need pre-checking
 import configparser
