@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 # built-in modules, does not need pre-checking
+from datetime import datetime
 import configparser
 import threading
 import argparse
@@ -53,6 +54,8 @@ class PortScanner:
 		self.target = target
 		self.port = port
 		self.config_file = path(config_file)
+		self.save_result = False
+		self.result = ""
 
 		try:
 			self.port_list = self.parse_port(self.port)
@@ -68,6 +71,7 @@ class PortScanner:
 		self.config.read(path(config_file))
 
 		self.port_services_file = path(self.config.get("files", "port_services"))
+		self.output_file = self.config.get("files", "output_file")
 		self.timeout = int(self.config.get("settings", "timeout_per_connect"))
 
 		with open(self.port_services_file) as file:
@@ -151,9 +155,19 @@ class PortScanner:
 				print(f"{' '*tabsize}{port[0]:<10}{port[1]}")
 				time.sleep(0.01)
 
-	# display settings from the config file
-	def display_config(self):
-		pass
+	# save scan results
+	def add_to_results(self, ip, target_ports, open_ports):
+		service_names = self.get_service_name(open_ports)
+		self.result += f"{' '*2}@{ip} {len(open_ports)}/{len(target_ports)} were found open\n"
+		self.result += f"{' '*4}{'PORT':<10}SERVICE\n"
+		for open_port in service_names:
+			self.result += f"{' '*4}{str(open_port[0]):<10}{str(open_port[1])}\n"
+
+
+	# save
+	def save_results(self):
+		with open(self.output_file, "a") as file:
+			file.write(self.result)
 
 	# start scan
 	def start_scan(self):
@@ -164,13 +178,27 @@ class PortScanner:
 		print(f"{' '*tabsize}{BLUE}{'PORT':<10}{RESET}{self.port}")
 		print(f"{' '*tabsize}{BLUE}{'VERBOSE':<10}{RESET}{self.verbose}")
 
+		if self.save_result:
+			self.result += f"{'―'*50}\n"
+			self.result += f"[{current_time()}] netscan result\n"
+			self.result += f"{'―'*50}\n"
+
 		start_time = time.time()
 		for target in self.target:
 			results = self.scan_ports(target, self.port_list)
 			self.display_results(target, self.port_list, results)
 
+			if self.save_result:
+				self.result += "\n"
+				self.add_to_results(target, self.port_list, results)
+
 		elapsed_time = round(time.time() - start_time, 1)
 		print(f"\n{bracket('info')} netscan finished in {elapsed_time}s")
+
+		if self.save_result:
+			self.result += f"{'―'*50}\n"
+			self.save_results()
+			print(f"{bracket('info')} results saved to {BLUE}{self.output_file}{RESET}")
 
 # main function to call
 def main():
@@ -211,6 +239,11 @@ def main():
 	config_file = "netscan.conf"
 	port_scanner = PortScanner(config_file, target, port)
 	port_scanner.verbose = args.verbose
+
+	if args.output:
+		port_scanner.save_result = True
+		port_scanner.output_file = args.output
+
 	port_scanner.start_scan()
 
 if __name__ == "__main__":
