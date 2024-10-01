@@ -1,3 +1,4 @@
+
 from setuptools import setup, find_packages
 
 setup(
@@ -7,7 +8,7 @@ setup(
     packages=find_packages(),
     entry_points={
         'console_scripts': [
-            'netscan=netscan.cli:main',
+            'netscan=netscan.cli:main'
         ],
     },
     install_requires=[
@@ -15,10 +16,15 @@ setup(
     ],
 	include_package_data=True,
 	package_data={
-		'netscan': ["*.json", "*.conf"]
+		'netscan': [
+			"*.json",
+			"*.conf",
+			"data/*",
+			"scripts/*"
+		]
 	},
     author='im-strange',
-	author_email="itsmestrange.dump@gmail.com",
+	author_email="im.strange.git@gmail.com",
     description='A command-line tool for scanning servers',
     long_description=open('README.md').read(),
     long_description_content_type='text/markdown',
