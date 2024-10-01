@@ -16,6 +16,8 @@ MAGENTA = '\033[35m'
 GRAY = '\033[90m'
 RESET = '\033[0m'
 
+print(sys.path)
+
 # check if third-party modules are installed
 try:
 	from scripts import PortScanner
