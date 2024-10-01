@@ -172,7 +172,6 @@ class PortScanner:
 	# start scan
 	def start_scan(self):
 		tabsize = 4
-		print()
 		print(f"{bracket('info')} netscan started")
 		print(f"{' '*tabsize}{BLUE}{'TARGET':<10}{RESET}{','.join(self.target)}")
 		print(f"{' '*tabsize}{BLUE}{'PORT':<10}{RESET}{self.port}")

@@ -18,7 +18,7 @@ RESET = '\033[0m'
 
 # check if third-party modules are installed
 try:
-	from netscan.scripts import PortScanner
+	from scripts import *
 
 # else, tell the user
 except ModuleNotFoundError as e:
@@ -39,39 +39,9 @@ def path(file):
 def bracket(text):
 	return f"{GRAY}[{YELLOW}{text}{GRAY}]{RESET}"
 
-# main function to call
-def main():
-	class CustomArgumentParser(argparse.ArgumentParser):
-		def print_help(self):
-			tabsize = 2
-			lines = [
-				f"usage: netscan <host> [options]",
-				f"\npositional arguments:",
-				f"{' '*tabsize}{'target':<15} target host/s",
-				f"{' '*tabsize}{'-p, --port':<15} target port/s [default=1-1000]",
-				f"\noptional arguments:",
-				f"{' '*tabsize}{'-v, --verbose':<15} print scanning info",
-				f"{' '*tabsize}{'-o, --output':<15} output file to write",
-				f"\nexamples:",
-				f"{' '*tabsize}netscan 127.0.0.1 -p 22,80,443",
-				f"{' '*tabsize}netscan example.com -o myresults.txt"
-			]
-			for line in lines:
-				print(line)
-				time.sleep(0.01)
 
-		def error(self, message):
-			print(f"[netscan] {message}")
-			print(f"[netscan] see '--help' for more info")
-			exit(2)
-
-	parser = CustomArgumentParser()
-	parser.add_argument("target")
-	parser.add_argument("-p", "--port", default="1-1000")
-	parser.add_argument("-v", "--verbose", action="store_true")
-	parser.add_argument("-o", "--output")
-
-	args = parser.parse_args()
+# start port scanning
+def start_port_scanning(args):
 	target = args.target.split(',')
 	port = args.port
 
@@ -84,6 +54,58 @@ def main():
 		port_scanner.output_file = args.output
 
 	port_scanner.start_scan()
+
+# main function to call
+def main():
+	manual = Manual()
+
+	class CustomArgumentParser(argparse.ArgumentParser):
+		def print_help(self):
+			tabsize = 2
+			lines = [
+				f"usage: netscan [commands] [options]",
+				f"\ncommands:",
+				f"{' '*tabsize}{'port':<10} scan for open ports",
+				f"{' '*tabsize}{'ping':<10} ping a host",
+				f"{' '*tabsize}{'vuln':<10} scan for vulnerabilities",
+				f"\nsee '[command] --manual' for more info"
+			]
+			for line in lines:
+				print(line)
+				time.sleep(0.01)
+
+		def error(self, message):
+			print(f"[netscan] {message}")
+			print(f"[netscan] see '--help' for more info")
+			exit(2)
+
+	parser = CustomArgumentParser()
+	subparsers = parser.add_subparsers(dest="command")
+
+	# port scanning
+	port_scanner = subparsers.add_parser("port")
+	port_scanner.add_argument("-t", "--target", help="target host")
+	port_scanner.add_argument("-p", "--port", default="1-1000")
+	port_scanner.add_argument("-v", "--verbose", action="store_true")
+	port_scanner.add_argument("-o", "--output")
+	port_scanner.add_argument("--manual", action="store_true")
+
+	args = parser.parse_args()
+
+	if args.command == "port":
+		if args.manual:
+			manual.port_scanner()
+			exit()
+
+		else:
+			if args.target is None:
+				print(f"[netscan] the following arguments are required: -t/--target")
+				exit()
+
+			start_port_scanning(args)
+
+	else:
+		parser.print_help()
 
 if __name__ == "__main__":
 	try:
