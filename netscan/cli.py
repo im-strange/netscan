@@ -16,11 +16,9 @@ MAGENTA = '\033[35m'
 GRAY = '\033[90m'
 RESET = '\033[0m'
 
-os.system("pwd")
-
 # check if third-party modules are installed
 try:
-	from scripts import PortScanner
+	from netscan.scripts import PortScanner
 
 # else, tell the user
 except ModuleNotFoundError as e:
