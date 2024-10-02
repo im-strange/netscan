@@ -19,12 +19,16 @@ RESET = '\033[0m'
 
 # for development
 try:
-	from scripts import *
+	from scripts.manuals import *
+	from scripts.reinstall import reinstall_package
+	from scripts.port_scanner import *
 
 # for deploy
 except ModuleNotFoundError as e:
 	try:
-		from netscan.scripts import *
+		from netscan.scripts.manuals import *
+		from netscan.scripts.reinstall import reinstall_package
+		from netscan.scripts.port_scanner import *
 
 	except ModuleNotFoundError as e:
 		print(f"[netscan] {e}")
@@ -48,7 +52,7 @@ def start_port_scanning(args):
 	target = args.target.split(',')
 	port = args.port
 
-	config_file = "netscan.conf"
+	config_file = "portscanner.conf"
 	port_scanner = PortScanner(config_file, target, port)
 	port_scanner.verbose = args.verbose
 
