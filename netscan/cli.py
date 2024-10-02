@@ -79,7 +79,7 @@ def main():
 
 			terminal_width = shutil.get_terminal_size().columns
 			max_width = terminal_width - 20
-			parsed = parse_manual(lines, max_width=max_width)
+			parsed = parse_manual(lines, max_width=max_width, mid_indent=10)
 
 			for line in parsed:
 				print(line)
