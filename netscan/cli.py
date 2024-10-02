@@ -73,10 +73,11 @@ def main():
 				("port", "scan for open ports on a host"),
 				("vuln","scan for known vulnerabilities on a host and generate report"),
 				("ping", "ping a host to check its availability"),
+				("reinstall", "uninstall and reinstall the package. Useful for fixing issues"),
 				"\nsee '[command] --manual' for more info"
 			]
 
-			parsed = parse_manual(lines, mid_indent=10)
+			parsed = parse_manual(lines, mid_indent=12)
 
 			for line in parsed:
 				print(line)
@@ -98,19 +99,23 @@ def main():
 	port_scanner.add_argument("-o", "--output")
 	port_scanner.add_argument("--manual", action="store_true")
 
+	# reinstall
+	reinstall = subparsers.add_parser("reinstall")
+
 	args = parser.parse_args()
 
 	if args.command == "port":
 		if args.manual:
 			manual.port_scanner()
 			exit()
-
 		else:
 			if args.target is None:
 				print(f"[netscan] the following arguments are required: -t/--target")
 				exit()
-
 			start_port_scanning(args)
+
+	elif args.command == "reinstall":
+		reinstall_package()
 
 	else:
 		parser.print_help()
