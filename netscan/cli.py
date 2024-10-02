@@ -4,7 +4,6 @@
 from datetime import datetime
 import textwrap
 import argparse
-import shutil
 import time
 import sys
 import os
@@ -77,9 +76,7 @@ def main():
 				"\nsee '[command] --manual' for more info"
 			]
 
-			terminal_width = shutil.get_terminal_size().columns
-			max_width = terminal_width - 20
-			parsed = parse_manual(lines, max_width=max_width, mid_indent=10)
+			parsed = parse_manual(lines, mid_indent=10)
 
 			for line in parsed:
 				print(line)

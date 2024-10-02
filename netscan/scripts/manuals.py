@@ -1,7 +1,10 @@
 import textwrap
+import shutil
 import time
 
 def parse_manual(lines, tabsize=2, max_width=45, mid_indent=15):
+	terminal_width = shutil.get_terminal_size().columns
+	max_width = terminal_width - 20 if terminal_width <= 70 else max_width
 	parsed = []
 	for line in lines:
 		if len(line) == 2:
