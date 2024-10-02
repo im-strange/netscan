@@ -19,40 +19,23 @@
 pip install git+https://github.com/im-strange/netscan.git
 ```
 
-## Usage
-```
-usage: netscan <host> [options]
-
-positional arguments:
-  target          target host/s
-  -p, --port      target port/s [default=1-1000]
-
-optional arguments:
-  -v, --verbose   print scanning info
-  -o, --output    output file to write
-
-examples:
-  netscan 127.0.0.1 -p 22,80,443
-  netscan example.com -o myresults.txt
-```
-
 ## Example output
-```python
-$ netscan www.google.com -p 1-1000
+```Usage
+usage: netscan [commands] [options]
 
-[info] netscan started
-    TARGET    localhost
-    PORT      1-1000
-    VERBOSE   False
+commands:
+  port        scan for open ports on a host
+  vuln        scan for known vulnerabilities on a host and
+              generate report
+  ping        ping a host to check its availability
+  reinstall   uninstall and reinstall the package. Useful
+              for fixing issues
 
-[info] @localhost 2/1000 were found open:
-    PORT      SERVICE
-    135       DCE endpoint resolution
-    445       Microsoft-DS
-
-[info] netscan finished in 0.4s
-
+see '[command] --manual' for more info
 ```
+
+## Command Documentation
+- [Port scanner](netscan/netscan/scripts/port_scanner/README.md)
 
 ## Found a bug?
 Shoot me an email at **im.strange.git@gmail.com**
