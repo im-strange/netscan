@@ -20,7 +20,8 @@ setup(
 			"*.json",
 			"*.conf",
 			"data/*",
-			"scripts/*"
+			"scripts/*",
+			"scripts/port_scanner/*"
 		]
 	},
     author='im-strange',
