@@ -9,7 +9,8 @@ def parse_manual(lines, tabsize=2, max_width=45, mid_indent=15):
 	for line in lines:
 		if len(line) == 2:
 			arg, desc = line
-			wrapped_desc = textwrap.fill(desc, width=max_width, subsequent_indent=' '*(tabsize+mid_indent))
+			wrapped_desc = f"\n{' '*(tabsize+mid_indent)}".join(textwrap.wrap(desc, width=max_width))
+			#wrapped_desc = textwrap.fill(desc, width=max_width, subsequent_indent=' '*(tabsize+mid_indent))
 			parsed.append(f"{' '*tabsize}{arg:<{mid_indent}}{wrapped_desc}")
 		else:
 			parsed.append(line)
