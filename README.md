@@ -35,7 +35,7 @@ see '[command] --manual' for more info
 ```
 
 ## Command Documentation
-- [Port scanner](netscan/netscan/scripts/port_scanner/README.md)
+- [Port scanner](netscan/scripts/port_scanner/README.md)
 
 ## Found a bug?
 Shoot me an email at **im.strange.git@gmail.com**
