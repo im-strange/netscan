@@ -16,15 +16,18 @@ MAGENTA = '\033[35m'
 GRAY = '\033[90m'
 RESET = '\033[0m'
 
-# check if third-party modules are installed
+# for development
 try:
 	from scripts import *
 
-# else, tell the user
+# for deploy
 except ModuleNotFoundError as e:
-	print(f"[netscan] {e}")
-	exit(2)
+	try:
+		from netscan.scripts import *
 
+	except ModuleNotFoundError as e:
+		print(f"[netscan] {e}")
+		exit(2)
 
 # get current datetime
 def current_time():
