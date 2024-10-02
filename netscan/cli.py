@@ -2,7 +2,9 @@
 
 # built-in modules, does not need pre-checking
 from datetime import datetime
+import textwrap
 import argparse
+import shutil
 import time
 import sys
 import os
@@ -42,7 +44,6 @@ def path(file):
 def bracket(text):
 	return f"{GRAY}[{YELLOW}{text}{GRAY}]{RESET}"
 
-
 # start port scanning
 def start_port_scanning(args):
 	target = args.target.split(',')
@@ -65,15 +66,22 @@ def main():
 	class CustomArgumentParser(argparse.ArgumentParser):
 		def print_help(self):
 			tabsize = 2
+			max_width = 40
+
 			lines = [
-				f"usage: netscan [commands] [options]",
-				f"\ncommands:",
-				f"{' '*tabsize}{'port':<10} scan for open ports",
-				f"{' '*tabsize}{'ping':<10} ping a host",
-				f"{' '*tabsize}{'vuln':<10} scan for vulnerabilities",
-				f"\nsee '[command] --manual' for more info"
+				"usage: netscan [commands] [options]",
+				"\ncommands:",
+				("port", "scan for open ports on a host"),
+				("vuln","scan for known vulnerabilities on a host and generate report"),
+				("ping", "ping a host to check its availability"),
+				"\nsee '[command] --manual' for more info"
 			]
-			for line in lines:
+
+			terminal_width = shutil.get_terminal_size().columns
+			max_width = terminal_width - 20
+			parsed = parse_manual(lines, max_width=max_width)
+
+			for line in parsed:
 				print(line)
 				time.sleep(0.01)
 
