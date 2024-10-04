@@ -14,6 +14,7 @@ def uninstall_package(package_name):
 		return True
 	except subprocess.CalledProcessError as e:
 		print(f"[info] error: {e}")
+		return False
 
 def install_package(url):
 	try:
@@ -27,6 +28,7 @@ def install_package(url):
 		return True
 	except subprocess.CalledProcessError as e:
 		print(f"[info] error: {e}")
+		return False
 
 def reinstall_package():
 	try:
@@ -39,9 +41,16 @@ def reinstall_package():
 			time.sleep(0.5)
 
 		print(f"[info] reinstalling the package", end="\r")
-		if install_package(url):
-			print(f"\r\r\r\r[info] reinstalling the package -> OK")
-			time.sleep(0.5)
+
+		installed = False
+		while not installed:
+			if install_package(url):
+				print(f"\r\r\r\r[info] reinstalling the package -> OK")
+				time.sleep(0.5)
+				installed = True
+			else:
+				print(f"\r\r\r\r[info] reinstalling the package -> OK")
+				time.sleep(0.5)
 
 		print(f"[info] package successfully reinstalled!")
 
