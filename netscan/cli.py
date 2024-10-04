@@ -174,9 +174,14 @@ def main():
 	else:
 		parser.print_help()
 
-if __name__ == "__main__":
+
+# main wrapped function to call
+def cli():
 	try:
 		main()
 	except KeyboardInterrupt:
 		print(f"\r\r\r\r\n{bracket('info')} stopped by user")
 		exit()
+
+if __name__ == "__main__":
+	cli()
