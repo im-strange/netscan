@@ -22,7 +22,7 @@ setup(
 			"data/*",
 			"scripts/*",
 			"scripts/port_scanner/*",
-			"scripts/dirhunter*"
+			"scripts/dirhunter/*"
 		]
 	},
     author='im-strange',
