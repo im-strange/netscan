@@ -8,7 +8,7 @@ setup(
     packages=find_packages(),
     entry_points={
         'console_scripts': [
-            'netscan=netscan.cli:main'
+            'netscan=netscan.cli:cli'
         ],
     },
     install_requires=[
