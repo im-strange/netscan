@@ -21,7 +21,8 @@ setup(
 			"*.conf",
 			"data/*",
 			"scripts/*",
-			"scripts/port_scanner/*"
+			"scripts/port_scanner/*",
+			"scripts/dirhunter*"
 		]
 	},
     author='im-strange',
