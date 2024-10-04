@@ -141,7 +141,7 @@ def main():
 	# dir hunter
 	dirhunter = subparsers.add_parser("dirhunter")
 	dirhunter.add_argument("-u", "--url")
-	dirhunter.add_argument("-w", "--wordlist", default="list1.txt")
+	dirhunter.add_argument("-w", "--wordlist", default=path("scripts/dirhunter/list1.txt"))
 	dirhunter.add_argument("-s", "--status-codes", dest="status_codes")
 	dirhunter.add_argument("-t", "--threads", type=int, dest="thread_count")
 	dirhunter.add_argument("-o", "--output", dest="output_file")
