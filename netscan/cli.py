@@ -22,6 +22,7 @@ try:
 	from scripts.manuals import *
 	from scripts.reinstall import reinstall_package
 	from scripts.port_scanner import *
+	from scripts.dirhunter import *
 
 # for deploy
 except ModuleNotFoundError as e:
@@ -29,6 +30,7 @@ except ModuleNotFoundError as e:
 		from netscan.scripts.manuals import *
 		from netscan.scripts.reinstall import reinstall_package
 		from netscan.scripts.port_scanner import *
+		from netscan.scripts.dirhunter import *
 
 	except ModuleNotFoundError as e:
 		print(f"[netscan] {e}")
@@ -49,6 +51,10 @@ def bracket(text):
 
 # start port scanning
 def start_port_scanning(args):
+	if args.target is None:
+		print(f"[netscan] required argument: -t/--target")
+		exit()
+
 	target = args.target.split(',')
 	port = args.port
 
@@ -61,6 +67,33 @@ def start_port_scanning(args):
 		port_scanner.output_file = args.output
 
 	port_scanner.start_scan()
+
+# start dir hunt
+def start_dirhunter(args):
+	if args.url is None:
+		print(f"[netscan] required argument: -u/--url")
+		eixt()
+
+	url = args.url
+	wordlist = args.wordlist
+	config_file = "dirhunter.conf"
+	dirhunter = DirHunter(config_file, url, wordlist)
+
+	if args.status_codes:
+		try:
+			dirhunter.status_codes = list(map(int, args.status_codes.split(",")))
+		except ValueError:
+			print(f"[info] invalid --status-code: {args.status_codes}")
+			print(f"[info] must be single or comma-separated integer")
+			exit()
+
+	if args.thread_count: dirhunter.thread_count = args.thread_count
+	if args.output_file: dirhunter.output_file = args.output_file
+	if args.sleep_time: dirhunter.sleep_time = args.sleep_time
+	if args.verbose: dirhunter.verbose = True
+
+	dirhunter.display_settings()
+	dirhunter.scan()
 
 # main function to call
 def main():
@@ -75,8 +108,7 @@ def main():
 				"usage: netscan [commands] [options]",
 				"\ncommands:",
 				("port", "scan for open ports on a host"),
-				("vuln","scan for known vulnerabilities on a host and generate report"),
-				("ping", "ping a host to check its availability"),
+				("dirhunter", "web directory scanner using wordlists to find hidden files and directories"),
 				("reinstall", "uninstall and reinstall the package. Useful for fixing issues"),
 				"\nsee '[command] --manual' for more info"
 			]
@@ -106,20 +138,38 @@ def main():
 	# reinstall
 	reinstall = subparsers.add_parser("reinstall")
 
+	# dir hunter
+	dirhunter = subparsers.add_parser("dirhunter")
+	dirhunter.add_argument("-u", "--url")
+	dirhunter.add_argument("-w", "--wordlist", default="list1.txt")
+	dirhunter.add_argument("-s", "--status-codes", dest="status_codes")
+	dirhunter.add_argument("-t", "--threads", type=int, dest="thread_count")
+	dirhunter.add_argument("-o", "--output", dest="output_file")
+	dirhunter.add_argument("--sleep", type=float, dest="sleep_time")
+	dirhunter.add_argument("--verbose", action="store_true")
+	dirhunter.add_argument("--manual", action="store_true")
+
 	args = parser.parse_args()
 
+	# for port scan
 	if args.command == "port":
 		if args.manual:
 			manual.port_scanner()
 			exit()
 		else:
-			if args.target is None:
-				print(f"[netscan] the following arguments are required: -t/--target")
-				exit()
 			start_port_scanning(args)
 
+	# for reinstalling
 	elif args.command == "reinstall":
 		reinstall_package()
+
+	# for dirhunter
+	elif args.command == "dirhunter":
+		if args.manual:
+			manual.dirhunter()
+			exit()
+		else:
+			start_dirhunter(args)
 
 	else:
 		parser.print_help()
