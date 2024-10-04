@@ -9,7 +9,6 @@
 ## Features
 - **Server Scanning**: Efficiently scan servers for open ports and vulnerabilities.
 - **Organized Result Printing**: Display scanning results in a clear and structured format.
-- **Custom Port Scanning**: Specify custom ports to scan based on your needs.
 - **Multiple Host Support**: Scan multiple hosts simultaneously for faster results.
 - **Progress Bar**: Visualize the scanning progress with a built-in progress bar for better tracking.
 
@@ -25,9 +24,8 @@ usage: netscan [commands] [options]
 
 commands:
   port        scan for open ports on a host
-  vuln        scan for known vulnerabilities on a host and
-              generate report
-  ping        ping a host to check its availability
+  dirhunter   web directory scanner using wordlists to find
+              hidden files and directories
   reinstall   uninstall and reinstall the package. Useful
               for fixing issues
 
