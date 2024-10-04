@@ -72,7 +72,7 @@ def start_port_scanning(args):
 def start_dirhunter(args):
 	if args.url is None:
 		print(f"[netscan] required argument: -u/--url")
-		eixt()
+		exit()
 
 	url = args.url
 	wordlist = args.wordlist
